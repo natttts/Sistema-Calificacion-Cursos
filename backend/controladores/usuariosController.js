@@ -284,6 +284,7 @@ const buscarUsuarioPorRegistro = async (req, res) => {
     }
 };
 
+
 //sirve para poder editar los datos menos el registro academico
 const actualizarUsuario = async (req, res) => {
     try {
@@ -327,6 +328,65 @@ const actualizarUsuario = async (req, res) => {
     }
 };
 
+//para ver el perfil con registro academico 
+const obtenerPerfilCompleto = async (req, res) => {
+    try {
+        const { registro_academico } = req.params;
+
+        // Buscar usuario
+        const [usuarios] = await conexion.query(
+            `SELECT id, registro_academico, nombres, apellidos, correo
+             FROM usuarios
+             WHERE registro_academico = ?`,
+            [registro_academico]
+        );
+
+        if (usuarios.length === 0) {
+            return res.status(404).json({
+                mensaje: 'Usuario no encontrado'
+            });
+        }
+
+        const usuario = usuarios[0];
+
+        // Buscar cursos aprobados
+        const [cursos] = await conexion.query(
+            `SELECT cursos.id, cursos.nombre, cursos.creditos
+             FROM cursos_aprobados
+             INNER JOIN cursos
+                ON cursos_aprobados.id_curso = cursos.id
+             WHERE cursos_aprobados.id_usuario = ?
+             ORDER BY cursos.nombre ASC`,
+            [usuario.id]
+        );
+
+        // Calcular créditos
+        const totalCreditos = cursos.reduce(
+            (total, curso) => total + curso.creditos,
+            0
+        );
+
+        res.json({
+            usuario: {
+                id: usuario.id,
+                registro_academico: usuario.registro_academico,
+                nombres: usuario.nombres,
+                apellidos: usuario.apellidos,
+                correo: usuario.correo
+            },
+            cursos_aprobados: cursos,
+            total_creditos: totalCreditos
+        });
+
+    } catch (error) {
+        console.error('Error al obtener perfil completo:', error);
+
+        res.status(500).json({
+            mensaje: 'Error al obtener perfil completo'
+        });
+    }
+};
+
     module.exports = {
       registrarUsuario,
        iniciarSesion,
@@ -337,6 +397,7 @@ const actualizarUsuario = async (req, res) => {
        eliminarCursoAprobado,
        obtenerTotalCreditos,
        buscarUsuarioPorRegistro,
-       actualizarUsuario
+       actualizarUsuario,
+       obtenerPerfilCompleto
     };
 

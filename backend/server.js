@@ -3,13 +3,24 @@ const cors = require('cors');
 const conexion = require('./config/db');
 
 const usuarioRutas = require('./rutas/usuarioRutas');
+const cursoRutas = require('./rutas/cursoRutas');
+const catedraticoRutas = require('./rutas/catedraticoRutas');
+const publicacionRutas = require('./rutas/publicacionRutas');
+const comentarioRutas = require('./rutas/comentarioRutas');
+
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+
 app.use('/api/usuarios', usuarioRutas);
+app.use('/api/cursos', cursoRutas);
+app.use('/api/catedraticos', catedraticoRutas);
+app.use('/api/publicaciones', publicacionRutas);
+app.use('/api/comentarios', comentarioRutas);
+
 
 app.get('/', (req, res) => {
     res.json({
