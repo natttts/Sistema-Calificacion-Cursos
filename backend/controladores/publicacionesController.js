@@ -24,7 +24,7 @@ const crearPublicacion = async (req, res) => {
 
         const [resultado] = await conexion.query(
             `INSERT INTO publicaciones
-            (id_usuario, id_curso, id_catedratico, contedio)
+            (id_usuario, id_curso, id_catedratico, contenido)
             VALUES (?, ?, ?, ?)`,
             [
                 id_usuario,
@@ -60,7 +60,7 @@ const obtenerPublicaciones = async (req, res) => {
         let consulta = `
             SELECT
                 publicaciones.id,
-                publicaciones.contedio AS contenido,
+                publicaciones.contenido AS contenido,
                 publicaciones.fecha_hora,
                 usuarios.id AS id_usuario,
                 usuarios.registro_academico,
@@ -97,9 +97,11 @@ const obtenerPublicaciones = async (req, res) => {
                 AND (
                     cursos.nombre LIKE ?
                     OR catedraticos.nombre LIKE ?
+                    OR publicaciones.contenido LIKE ?
                 )
             `;
 
+            parametros.push(`%${texto}%`);
             parametros.push(`%${texto}%`);
             parametros.push(`%${texto}%`);
         }
